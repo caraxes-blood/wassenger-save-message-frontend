@@ -1,6 +1,11 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 
 import { getWassengerBaseUrl } from "./wassenger-env";
+
+function isLoginRequest(error: AxiosError): boolean {
+  const url = error.config?.url ?? "";
+  return url.endsWith("/auth/login") || url.includes("/auth/login");
+}
 
 export function createWassengerClient() {
   const api = axios.create({
@@ -11,8 +16,15 @@ export function createWassengerClient() {
   api.interceptors.response.use(
     (r) => r,
     (err: unknown) => {
-      const status = getResponseStatus(err);
-      if (status === 401 && typeof window !== "undefined") {
+      if (!axios.isAxiosError(err)) {
+        return Promise.reject(err);
+      }
+      const status = err.response?.status;
+      if (
+        status === 401 &&
+        typeof window !== "undefined" &&
+        !isLoginRequest(err)
+      ) {
         window.location.assign("/login");
       }
       return Promise.reject(err);
@@ -20,11 +32,4 @@ export function createWassengerClient() {
   );
 
   return api;
-}
-
-function getResponseStatus(err: unknown): number | undefined {
-  if (typeof err !== "object" || err === null) return undefined;
-  if (!("response" in err)) return undefined;
-  const res = (err as { response?: { status?: number } }).response;
-  return res?.status;
 }

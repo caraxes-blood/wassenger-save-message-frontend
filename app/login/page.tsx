@@ -33,6 +33,10 @@ export default function LoginPage() {
       setError("Login was not accepted.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
+        if (err.response?.status === 401) {
+          setError("Invalid username or password.");
+          return;
+        }
         const msg =
           typeof err.response?.data === "string"
             ? err.response.data
