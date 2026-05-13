@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { MessagesDataTable } from "@/components/messages-data-table";
+import { FailedMessagesDataTable } from "@/components/failed-messages-data-table";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,9 +23,9 @@ import {
   parseMessagePageLimit,
 } from "@/lib/messages-pagination";
 import { createWassengerClient } from "@/lib/wassenger-axios";
-import type { MessagesPage } from "@/types/wassenger";
+import type { FailedMessagesPage } from "@/types/wassenger";
 
-export function MessagesScreen() {
+export function FailedMessagesScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const api = useMemo(() => createWassengerClient(), []);
@@ -41,9 +41,9 @@ export function MessagesScreen() {
   const [logoutBusy, setLogoutBusy] = useState(false);
 
   const query = useQuery({
-    queryKey: ["messages", pageFromUrl, limitFromUrl],
+    queryKey: ["messages-failed", pageFromUrl, limitFromUrl],
     queryFn: async () => {
-      const res = await api.get<MessagesPage>("/messages", {
+      const res = await api.get<FailedMessagesPage>("/messages/failed", {
         params: { page: pageFromUrl, limit: limitFromUrl },
       });
       return res.data;
@@ -60,7 +60,7 @@ export function MessagesScreen() {
       const params = new URLSearchParams();
       params.set("page", String(safePage));
       params.set("limit", String(limitFromUrl));
-      router.replace(`/messages?${params.toString()}`);
+      router.replace(`/messages/failed?${params.toString()}`);
     }
   }, [data, pageFromUrl, router, safePage, limitFromUrl]);
 
@@ -84,14 +84,14 @@ export function MessagesScreen() {
     const params = new URLSearchParams();
     params.set("page", String(p));
     params.set("limit", String(limitFromUrl));
-    return `/messages?${params.toString()}`;
+    return `/messages/failed?${params.toString()}`;
   }
 
   function onLimitChange(next: string) {
     const params = new URLSearchParams();
     params.set("page", "1");
     params.set("limit", next);
-    router.replace(`/messages?${params.toString()}`);
+    router.replace(`/messages/failed?${params.toString()}`);
   }
 
   return (
@@ -99,7 +99,7 @@ export function MessagesScreen() {
       <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="messages-heading text-xl font-semibold tracking-tight">
-            Messages
+            Failed messages
           </h1>
           <p className="text-muted-foreground text-sm">
             {data
@@ -108,11 +108,11 @@ export function MessagesScreen() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="secondary">
+          <Button asChild type="button" variant="outline">
             <Link
-              href={`/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
+              href={`/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
             >
-              View failed messages
+              Back to messages
             </Link>
           </Button>
           <Button
@@ -128,7 +128,7 @@ export function MessagesScreen() {
 
       {query.isError ? (
         <div className="shrink-0 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
-          <p className="font-medium">Could not load messages</p>
+          <p className="font-medium">Could not load failed messages</p>
           <p className="text-muted-foreground mt-1">
             {query.error instanceof Error
               ? query.error.message
@@ -146,12 +146,14 @@ export function MessagesScreen() {
       ) : null}
 
       {query.isLoading ? (
-        <p className="text-muted-foreground shrink-0 text-sm">Loading messages…</p>
+        <p className="text-muted-foreground shrink-0 text-sm">
+          Loading failed messages…
+        </p>
       ) : null}
 
       {data && !query.isLoading ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-          <MessagesDataTable data={data.data} />
+          <FailedMessagesDataTable data={data.data} />
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Rows per page</span>
