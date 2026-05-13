@@ -9,7 +9,9 @@ export default function MessagesRoutePage() {
         <div className="text-muted-foreground p-6 text-sm">Loading…</div>
       }
     >
-      <MessagesScreen />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <MessagesScreen />
+      </div>
     </Suspense>
   );
 }

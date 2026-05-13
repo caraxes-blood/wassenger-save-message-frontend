@@ -1,5 +1,14 @@
-import Link from "next/link";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -9,6 +18,26 @@ type Props = {
   hasPrev: boolean;
   buildHref: (p: number) => string;
 };
+
+function DisabledPageControl({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      aria-disabled
+      className={cn(
+        "inline-flex h-8 cursor-not-allowed items-center justify-center gap-1 rounded-lg px-2 text-sm text-muted-foreground opacity-45",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
 
 export function PageNumberPagination({
   page,
@@ -27,67 +56,104 @@ export function PageNumberPagination({
   const atFirst = page <= 1;
   const atLast = page >= totalPages;
 
-  return (
-    <nav
-      aria-label="Pagination"
-      className="flex flex-wrap items-center justify-center gap-2 text-sm"
-    >
-      <PaginationLink disabled={atFirst} href={buildHref(1)} label="First" />
-      <PaginationLink
-        disabled={!hasPrev}
-        href={buildHref(Math.max(1, page - 1))}
-        label="Previous"
-      />
-      {pages.map((p) => (
-        <Link
-          key={p}
-          className={cn(
-            "inline-flex min-w-9 items-center justify-center rounded-md border px-2 py-1",
-            p === page
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border bg-background hover:bg-muted",
-          )}
-          href={buildHref(p)}
-        >
-          {p}
-        </Link>
-      ))}
-      <PaginationLink
-        disabled={!hasNext}
-        href={buildHref(Math.min(totalPages, page + 1))}
-        label="Next"
-      />
-      <PaginationLink
-        disabled={atLast}
-        href={buildHref(totalPages)}
-        label="Last"
-      />
-    </nav>
-  );
-}
+  const showLeadingEllipsis = windowStart > 2;
+  const showTrailingEllipsis = windowEnd < totalPages - 1;
 
-function PaginationLink({
-  href,
-  label,
-  disabled,
-}: {
-  href: string;
-  label: string;
-  disabled: boolean;
-}) {
-  if (disabled) {
-    return (
-      <span className="text-muted-foreground cursor-not-allowed px-2 py-1">
-        {label}
-      </span>
-    );
-  }
   return (
-    <Link
-      className="rounded-md border border-border bg-background px-2 py-1 hover:bg-muted"
-      href={href}
-    >
-      {label}
-    </Link>
+    <Pagination>
+      <PaginationContent className="flex-wrap justify-center gap-1">
+        <PaginationItem>
+          {atFirst ? (
+            <DisabledPageControl>First</DisabledPageControl>
+          ) : (
+            <PaginationLink href={buildHref(1)} size="default">
+              First
+            </PaginationLink>
+          )}
+        </PaginationItem>
+
+        <PaginationItem>
+          {!hasPrev ? (
+            <DisabledPageControl className="pl-1.5">
+              <ChevronLeftIcon className="size-4 shrink-0" data-icon="inline-start" />
+              <span className="hidden sm:inline">Previous</span>
+            </DisabledPageControl>
+          ) : (
+            <PaginationPrevious href={buildHref(Math.max(1, page - 1))} />
+          )}
+        </PaginationItem>
+
+        {windowStart > 1 ? (
+          <PaginationItem>
+            <PaginationLink href={buildHref(1)} isActive={page === 1} size="icon">
+              1
+            </PaginationLink>
+          </PaginationItem>
+        ) : null}
+
+        {showLeadingEllipsis ? (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        ) : null}
+
+        {pages.map((p) => {
+          if (p === 1 && windowStart > 1) return null;
+          if (p === totalPages && windowEnd < totalPages) return null;
+          return (
+            <PaginationItem key={p}>
+              <PaginationLink
+                href={buildHref(p)}
+                isActive={p === page}
+                size="icon"
+              >
+                {p}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+
+        {showTrailingEllipsis ? (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        ) : null}
+
+        {windowEnd < totalPages ? (
+          <PaginationItem>
+            <PaginationLink
+              href={buildHref(totalPages)}
+              isActive={page === totalPages}
+              size="icon"
+            >
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        ) : null}
+
+        <PaginationItem>
+          {!hasNext ? (
+            <DisabledPageControl className="pr-1.5">
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRightIcon className="size-4 shrink-0" data-icon="inline-end" />
+            </DisabledPageControl>
+          ) : (
+            <PaginationNext
+              href={buildHref(Math.min(totalPages, page + 1))}
+            />
+          )}
+        </PaginationItem>
+
+        <PaginationItem>
+          {atLast ? (
+            <DisabledPageControl>Last</DisabledPageControl>
+          ) : (
+            <PaginationLink href={buildHref(totalPages)} size="default">
+              Last
+            </PaginationLink>
+          )}
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 }

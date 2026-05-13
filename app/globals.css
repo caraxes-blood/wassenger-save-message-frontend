@@ -121,10 +121,25 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans bg-background;
+    background-image: none !important;
+  }
   body {
     @apply bg-background text-foreground;
+    background-image: none !important;
   }
-  html {
-    @apply font-sans;
-  }
+}
+
+.messages-desk {
+  background-color: var(--background);
+  background-image: none !important;
+}
+
+.messages-desk .messages-mono {
+  font-family: var(--font-messages-mono), ui-monospace, monospace;
+}
+
+.messages-desk .messages-heading {
+  font-family: var(--font-messages-display), ui-sans-serif, system-ui;
 }

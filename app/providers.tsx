@@ -12,5 +12,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       }),
   );
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col bg-background">
+      <QueryClientProvider client={client}>
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      </QueryClientProvider>
+    </div>
+  );
 }
