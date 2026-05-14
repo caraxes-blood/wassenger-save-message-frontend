@@ -43,3 +43,30 @@ export type FailedMessagesPage = {
   hasNext: boolean;
   hasPrev: boolean;
 };
+
+export type CleanedMessage = {
+  id: string;
+  message_id: string;
+  sender: string;
+  conversation_id: string;
+  timestamp: string;
+  clean_body: string;
+  intent: string;
+  confidence: number;
+  intent_signal: string;
+  price_usd: number | null;
+  watch_ref: string | null;
+  condition: string | null;
+  language: string;
+  is_system: boolean;
+  processed_at: string;
+};
+
+export type CleanedMessagesPage = {
+  data: CleanedMessage[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};

@@ -110,6 +110,13 @@ export function MessagesScreen() {
         <div className="flex flex-wrap gap-2">
           <Button asChild type="button" variant="default">
             <Link
+              href={`/messages/cleaned?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
+            >
+              View cleaned messages
+            </Link>
+          </Button>
+          <Button asChild type="button" variant="default">
+            <Link
               href={`/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
             >
               View failed messages
