@@ -95,7 +95,7 @@ export function MessagesScreen() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
+    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
       <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="messages-heading text-xl font-semibold tracking-tight">
@@ -108,7 +108,7 @@ export function MessagesScreen() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="secondary">
+          <Button asChild type="button" variant="default">
             <Link
               href={`/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
             >
@@ -119,7 +119,7 @@ export function MessagesScreen() {
             disabled={logoutBusy}
             onClick={onLogout}
             type="button"
-            variant="outline"
+            variant="destructive"
           >
             {logoutBusy ? "Signing out…" : "Log out"}
           </Button>

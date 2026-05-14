@@ -8,6 +8,11 @@ export type SavedMessage = {
   timestamp: string;
   payload: unknown;
   created_at: string;
+  /** When omitted (older payloads), UI treats as unknown. */
+  is_relevant?: boolean;
+  skip_reason?: string | null;
+  sender_name?: string | null;
+  chat_name?: string | null;
 };
 
 export type MessagesPage = {

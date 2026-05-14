@@ -26,14 +26,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatTableHeaderLabel } from "@/lib/utils";
 import type { SavedMessage } from "@/types/wassenger";
 
 type MessagesDataTableProps = {
   data: SavedMessage[];
 };
 
+const defaultColumnVisibility: VisibilityState = {
+  id: false,
+  message_id: false,
+  conversation_id: false,
+};
+
 export function MessagesDataTable({ data }: MessagesDataTableProps) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] =
+    useState<VisibilityState>(defaultColumnVisibility);
 
   // TanStack Table returns unstable function refs; React Compiler skips memoization (known pattern).
   // eslint-disable-next-line react-hooks/incompatible-library -- useReactTable is the supported API
@@ -68,22 +76,24 @@ export function MessagesDataTable({ data }: MessagesDataTableProps) {
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
-                  {column.columnDef.meta?.label ?? column.id}
+                  {formatTableHeaderLabel(
+                    String(column.columnDef.meta?.label ?? column.id),
+                  )}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border">
-        <Table className="min-w-[72rem] text-left text-sm">
-          <TableHeader className="border-b border-border bg-muted text-muted-foreground shadow-sm [&_tr]:border-b-0">
+      <div className="min-h-0 w-full max-w-full flex-1 overflow-x-auto overflow-y-auto rounded-lg border border-border">
+        <Table className="min-w-480 w-max max-w-none text-left text-sm">
+          <TableHeader className="border-b border-border bg-primary text-primary-foreground shadow-sm [&_tr]:border-b-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-0 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="sticky top-0 z-10 border-b border-border bg-muted px-3 py-2 font-medium"
+                    className="sticky top-0 z-10 border-b border-primary-foreground/15 bg-primary px-3 py-2.5 text-base font-bold tracking-wide text-primary-foreground uppercase"
                   >
                     {header.isPlaceholder
                       ? null

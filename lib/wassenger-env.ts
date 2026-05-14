@@ -1,6 +1,6 @@
 /** Public API origin (same as `.env.example`). Used only when env is unset in development. */
 const DEFAULT_WASSENGER_API_BASE_URL =
-  "https://wassenger-save-webhook-message-production.up.railway.app";
+  "http://localhost:5173";
 
 export function getWassengerBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_WASSENGER_API_BASE_URL?.trim();

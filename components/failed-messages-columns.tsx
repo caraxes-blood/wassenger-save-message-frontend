@@ -3,6 +3,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { messageDateFmt, truncateMessagePreview } from "@/lib/message-display";
+import { typeBadgeClasses } from "@/lib/type-badge";
+import { formatTableHeaderLabel } from "@/lib/utils";
 import type { FailedMessage } from "@/types/wassenger";
 
 function TypePill({ type }: { type: string }) {
@@ -11,7 +13,7 @@ function TypePill({ type }: { type: string }) {
   }
   return (
     <span
-      className="inline-flex max-w-[140px] truncate rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
+      className={`inline-flex max-w-[140px] truncate rounded-full border px-2 py-0.5 text-xs font-medium ${typeBadgeClasses(type)}`}
       title={type}
     >
       {type}
@@ -23,7 +25,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "jobId",
     meta: { label: "Job ID" },
-    header: "jobId",
+    header: formatTableHeaderLabel("jobId"),
     cell: ({ row }) => (
       <span className="messages-mono text-muted-foreground text-xs">
         {row.getValue("jobId")}
@@ -33,7 +35,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "messageId",
     meta: { label: "Message ID" },
-    header: "messageId",
+    header: formatTableHeaderLabel("messageId"),
     cell: ({ row }) => (
       <span className="messages-mono text-xs">{row.getValue("messageId")}</span>
     ),
@@ -41,7 +43,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "from",
     meta: { label: "From" },
-    header: "from",
+    header: formatTableHeaderLabel("from"),
     cell: ({ row }) => (
       <span className="max-w-[180px] truncate" title={String(row.getValue("from"))}>
         {row.getValue("from")}
@@ -51,13 +53,13 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "type",
     meta: { label: "Type" },
-    header: "type",
+    header: formatTableHeaderLabel("type"),
     cell: ({ row }) => <TypePill type={row.getValue("type")} />,
   },
   {
     accessorKey: "body",
     meta: { label: "Body" },
-    header: "body",
+    header: formatTableHeaderLabel("body"),
     cell: ({ row }) => {
       const text = truncateMessagePreview(String(row.getValue("body") ?? ""), 120);
       return (
@@ -70,7 +72,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "failedAt",
     meta: { label: "Failed at" },
-    header: "failedAt",
+    header: formatTableHeaderLabel("failedAt"),
     cell: ({ row }) => (
       <span className="messages-mono text-muted-foreground whitespace-nowrap text-xs">
         {messageDateFmt.format(new Date(row.getValue("failedAt")))}
@@ -80,7 +82,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "createdAt",
     meta: { label: "Created at" },
-    header: "createdAt",
+    header: formatTableHeaderLabel("createdAt"),
     cell: ({ row }) => (
       <span className="messages-mono text-muted-foreground whitespace-nowrap text-xs">
         {messageDateFmt.format(new Date(row.getValue("createdAt")))}
@@ -90,7 +92,7 @@ export const failedMessagesColumns: ColumnDef<FailedMessage>[] = [
   {
     accessorKey: "error",
     meta: { label: "Error" },
-    header: "error",
+    header: formatTableHeaderLabel("error"),
     cell: ({ row }) => (
       <span className="text-destructive max-w-lg wrap-break-word text-xs leading-relaxed whitespace-pre-wrap">
         {String(row.getValue("error") ?? "—")}

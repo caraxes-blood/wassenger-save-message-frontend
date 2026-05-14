@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatTableHeaderLabel } from "@/lib/utils";
 import type { FailedMessage } from "@/types/wassenger";
 
 type FailedMessagesDataTableProps = {
@@ -68,22 +69,24 @@ export function FailedMessagesDataTable({ data }: FailedMessagesDataTableProps) 
                   checked={column.getIsVisible()}
                   onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
-                  {column.columnDef.meta?.label ?? column.id}
+                  {formatTableHeaderLabel(
+                    String(column.columnDef.meta?.label ?? column.id),
+                  )}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border">
-        <Table className="min-w-[72rem] text-left text-sm">
-          <TableHeader className="border-b border-border bg-muted text-muted-foreground shadow-sm [&_tr]:border-b-0">
+      <div className="min-h-0 w-full max-w-full flex-1 overflow-x-auto overflow-y-auto rounded-lg border border-border">
+        <Table className="min-w-[120rem] w-max max-w-none text-left text-sm">
+          <TableHeader className="border-b border-border bg-primary text-primary-foreground shadow-sm [&_tr]:border-b-0">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="border-0 hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="sticky top-0 z-10 border-b border-border bg-muted px-3 py-2 font-medium"
+                    className="sticky top-0 z-10 border-b border-primary-foreground/15 bg-primary px-3 py-2.5 text-base font-bold tracking-wide text-primary-foreground uppercase"
                   >
                     {header.isPlaceholder
                       ? null
