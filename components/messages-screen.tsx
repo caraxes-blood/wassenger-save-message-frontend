@@ -122,6 +122,9 @@ export function MessagesScreen() {
               View failed messages
             </Link>
           </Button>
+          <Button asChild type="button" variant="outline">
+            <Link href="/users?page=1&limit=20">View users</Link>
+          </Button>
           <Button
             disabled={logoutBusy}
             onClick={onLogout}

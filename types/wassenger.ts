@@ -62,6 +62,32 @@ export type CleanedMessage = {
   processed_at: string;
 };
 
+export type User = {
+  phone: string;
+  name: string | null;
+  wid: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UsersPage = {
+  data: User[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
+
+export type Group = {
+  wid: string;
+  name: string | null;
+};
+
+export type GroupsResponse = {
+  data: Group[];
+};
+
 export type CleanedMessagesPage = {
   data: CleanedMessage[];
   total: number;
