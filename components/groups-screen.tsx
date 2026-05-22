@@ -77,7 +77,7 @@ export function GroupsScreen() {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ wid, active }: { wid: string; active: boolean }) => {
-      const res = await api.patch<{ data: Group }>(`/groups/${encodeURIComponent(wid)}`, { active });
+      const res = await api.patch<{ data: Group }>('/groups', { wid, active });
       return res.data.data;
     },
     onMutate: ({ wid, active }) => {
