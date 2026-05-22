@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   type VisibilityState,
   flexRender,
@@ -43,7 +43,8 @@ export function GroupsDataTable({ data, onToggleActive, pendingWids }: GroupsDat
   const [columnVisibility, setColumnVisibility] =
     useState<VisibilityState>(defaultColumnVisibility);
 
-  const columns = createGroupsColumns(onToggleActive, pendingWids);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- pendingWids is a Set (referentially unstable); useMemo on its contents
+  const columns = useMemo(() => createGroupsColumns(onToggleActive, pendingWids), [onToggleActive, pendingWids]);
 
   // eslint-disable-next-line react-hooks/incompatible-library -- useReactTable is the supported API
   const table = useReactTable({

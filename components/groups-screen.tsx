@@ -44,6 +44,7 @@ export function GroupsScreen() {
 
   const [searchInput, setSearchInput] = useState(qFromUrl);
   const [pendingWids, setPendingWids] = useState<Set<string>>(new Set());
+  const [toggleError, setToggleError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -106,14 +107,17 @@ export function GroupsScreen() {
       });
       // Invalidate the groups list used by the users filter dropdown
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
+      setToggleError(null);
     },
-    onError: (_err, { wid }) => {
+    onError: (err, { wid }) => {
       setPendingWids((prev) => {
         const next = new Set(prev);
         next.delete(wid);
         return next;
       });
       void queryClient.invalidateQueries({ queryKey: groupsQueryKey });
+      const msg = err instanceof Error ? err.message : String(err);
+      setToggleError(`Failed to update group: ${msg}`);
     },
   });
 
@@ -182,6 +186,19 @@ export function GroupsScreen() {
           >
             Retry
           </Button>
+        </div>
+      ) : null}
+
+      {toggleError ? (
+        <div className="shrink-0 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+          <p className="font-medium text-destructive">{toggleError}</p>
+          <button
+            className="text-muted-foreground mt-1 text-xs underline"
+            type="button"
+            onClick={() => setToggleError(null)}
+          >
+            Dismiss
+          </button>
         </div>
       ) : null}
 
