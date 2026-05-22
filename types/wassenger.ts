@@ -82,10 +82,26 @@ export type UsersPage = {
 export type Group = {
   wid: string;
   name: string | null;
+  device_id: string | null;
+  active: boolean;
+  total_participants: number | null;
+  is_archive: boolean;
+  created_at: string | null;
+  last_message_at: string | null;
+  last_synced_at: string | null;
 };
 
 export type GroupsResponse = {
   data: Group[];
+};
+
+export type GroupsPage = {
+  data: Group[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 };
 
 export type CleanedMessagesPage = {
