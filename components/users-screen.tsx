@@ -157,6 +157,9 @@ export function UsersScreen() {
           <Button asChild type="button" variant="outline">
             <Link href="/messages/cleaned?page=1&limit=20">Cleaned messages</Link>
           </Button>
+          <Button asChild type="button" variant="outline">
+            <Link href="/groups?page=1&limit=20">Groups</Link>
+          </Button>
         </div>
       </header>
 

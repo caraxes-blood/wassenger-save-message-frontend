@@ -125,6 +125,9 @@ export function MessagesScreen() {
           <Button asChild type="button" variant="outline">
             <Link href="/users?page=1&limit=20">View users</Link>
           </Button>
+          <Button asChild type="button" variant="outline">
+            <Link href="/groups?page=1&limit=20">Groups</Link>
+          </Button>
           <Button
             disabled={logoutBusy}
             onClick={onLogout}
