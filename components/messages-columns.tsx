@@ -3,6 +3,14 @@
 import type { ColumnDef } from "@tanstack/react-table";
 
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   messageDateFmt,
   resolveMessageImageUrl,
   truncateMessagePreview,
@@ -82,16 +90,41 @@ function NullableText({
   );
 }
 
-function TruncatedBody({ value }: { value: string | null | undefined }) {
+function ExpandableTextCell({
+  value,
+  label,
+}: {
+  value: string | null | undefined;
+  label: string;
+}) {
   const raw = typeof value === "string" ? value : "";
-  const text = truncateMessagePreview(raw, 120);
-  if (!text) {
+  const preview = truncateMessagePreview(raw, 120);
+  if (!preview) {
     return <span className="text-muted-foreground">—</span>;
   }
   return (
-    <span className="text-muted-foreground line-clamp-3 max-w-md whitespace-pre-wrap wrap-break-word text-xs leading-relaxed">
-      {text}
-    </span>
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="text-muted-foreground line-clamp-3 max-w-md cursor-pointer rounded text-left whitespace-pre-wrap wrap-break-word text-xs leading-relaxed transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          title="Click to view full text"
+        >
+          {preview}
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{label}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Full {label.toLowerCase()} value
+          </DialogDescription>
+        </DialogHeader>
+        <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border bg-muted/30 p-3 text-sm whitespace-pre-wrap wrap-break-word select-text">
+          {raw}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -145,13 +178,17 @@ export const messagesColumns: ColumnDef<SavedMessage>[] = [
     accessorKey: "message_body",
     meta: { label: "Message body" },
     header: formatTableHeaderLabel("message_body"),
-    cell: ({ row }) => <TruncatedBody value={row.original.message_body} />,
+    cell: ({ row }) => (
+      <ExpandableTextCell label="Message body" value={row.original.message_body} />
+    ),
   },
   {
     accessorKey: "caption",
     meta: { label: "Caption" },
     header: formatTableHeaderLabel("caption"),
-    cell: ({ row }) => <TruncatedBody value={row.original.caption} />,
+    cell: ({ row }) => (
+      <ExpandableTextCell label="Caption" value={row.original.caption} />
+    ),
   },
   {
     accessorKey: "ref_numbers",
