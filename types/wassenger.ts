@@ -115,3 +115,30 @@ export type CleanedMessagesPage = {
   hasNext: boolean;
   hasPrev: boolean;
 };
+
+export type DealIntent = "buy" | "sell" | "unknown";
+
+export type Deal = {
+  id: string;
+  message_id: string;
+  ref_number: string;
+  intent: DealIntent;
+  price_amount: number | null;
+  price_currency: string | null;
+  sender: string;
+  conversation_id: string;
+  group_name: string | null;
+  message_timestamp: string;
+  created_at: string;
+  message_body: string;
+  caption: string | null;
+};
+
+export type DealsPage = {
+  data: Deal[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
