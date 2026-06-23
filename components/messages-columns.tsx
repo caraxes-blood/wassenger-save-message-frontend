@@ -128,6 +128,49 @@ function ExpandableTextCell({
   );
 }
 
+function ExpandableRefsCell({ refs }: { refs: string[] | null | undefined }) {
+  if (!refs?.length) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+  const text = refs.join(", ");
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="messages-mono line-clamp-2 max-w-[200px] cursor-pointer rounded text-left text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          title="Click to view all ref numbers"
+        >
+          {text}
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            Ref numbers{" "}
+            <span className="text-muted-foreground font-normal">
+              ({refs.length})
+            </span>
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            All reference numbers for this message
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex max-h-[60vh] flex-wrap gap-1.5 overflow-y-auto">
+          {refs.map((ref, i) => (
+            <span
+              key={`${ref}-${i}`}
+              className="messages-mono inline-flex rounded-md border border-border bg-muted/40 px-2 py-1 text-xs select-text"
+            >
+              {ref}
+            </span>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export const messagesColumns: ColumnDef<SavedMessage>[] = [
   {
     accessorKey: "id",
@@ -194,18 +237,7 @@ export const messagesColumns: ColumnDef<SavedMessage>[] = [
     accessorKey: "ref_numbers",
     meta: { label: "Ref numbers" },
     header: formatTableHeaderLabel("ref_numbers"),
-    cell: ({ row }) => {
-      const refs = row.original.ref_numbers;
-      if (!refs?.length) {
-        return <span className="text-muted-foreground">—</span>;
-      }
-      const text = refs.join(", ");
-      return (
-        <span className="max-w-[200px] truncate text-xs" title={text}>
-          {text}
-        </span>
-      );
-    },
+    cell: ({ row }) => <ExpandableRefsCell refs={row.original.ref_numbers} />,
   },
   {
     accessorKey: "is_relevant",
