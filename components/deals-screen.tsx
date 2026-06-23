@@ -20,6 +20,10 @@ import {
   DEAL_PAGE_SIZES,
   parseDealPageLimit,
 } from "@/lib/deals-pagination";
+import {
+  buildDealsPath,
+  parsePhoneFilterFromUrl,
+} from "@/lib/deals-filter-params";
 import { clampPage, getTotalPages } from "@/lib/messages-pagination";
 import { createWassengerClient } from "@/lib/wassenger-axios";
 import type { DealIntent, DealsPage } from "@/types/wassenger";
@@ -30,22 +34,6 @@ function parseIntentFromUrl(raw: string | null): string {
   if (raw == null || raw === "") return "";
   const t = raw.trim().toLowerCase();
   return (DEAL_INTENTS as readonly string[]).includes(t) ? t : "";
-}
-
-function buildDealsPath(opts: {
-  page: number;
-  limit: number;
-  phone: string;
-  ref: string;
-  intent: string;
-}): string {
-  const params = new URLSearchParams();
-  params.set("page", String(opts.page));
-  params.set("limit", String(opts.limit));
-  if (opts.phone) params.set("phone", opts.phone);
-  if (opts.ref) params.set("ref", opts.ref);
-  if (opts.intent) params.set("intent", opts.intent);
-  return `/deals?${params.toString()}`;
 }
 
 export function DealsScreen() {
@@ -59,7 +47,8 @@ export function DealsScreen() {
     Number.MAX_SAFE_INTEGER,
   );
   const limitFromUrl = parseDealPageLimit(searchParams.get("limit"));
-  const phoneFromUrl = searchParams.get("phone") ?? "";
+  const rawPhoneFromUrl = searchParams.get("phone") ?? "";
+  const phoneFromUrl = parsePhoneFilterFromUrl(rawPhoneFromUrl);
   const refFromUrl = searchParams.get("ref") ?? "";
   const intentFromUrl = parseIntentFromUrl(searchParams.get("intent"));
 
@@ -140,6 +129,27 @@ export function DealsScreen() {
   const data = query.data;
   const totalPages = data ? getTotalPages(data.total, limitFromUrl) : 1;
   const safePage = clampPage(pageFromUrl, totalPages);
+
+  useEffect(() => {
+    if (!rawPhoneFromUrl || rawPhoneFromUrl === phoneFromUrl) return;
+    router.replace(
+      buildDealsPath({
+        page: pageFromUrl,
+        limit: limitFromUrl,
+        phone: phoneFromUrl,
+        ref: refFromUrl,
+        intent: intentFromUrl,
+      }),
+    );
+  }, [
+    intentFromUrl,
+    limitFromUrl,
+    pageFromUrl,
+    phoneFromUrl,
+    rawPhoneFromUrl,
+    refFromUrl,
+    router,
+  ]);
 
   useEffect(() => {
     if (!data) return;
