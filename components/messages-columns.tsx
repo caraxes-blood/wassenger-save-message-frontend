@@ -138,7 +138,7 @@ function ExpandableRefsCell({ refs }: { refs: string[] | null | undefined }) {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="messages-mono line-clamp-2 max-w-[200px] cursor-pointer rounded text-left text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="messages-mono line-clamp-2 w-[120px] cursor-pointer rounded text-left text-xs break-all text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           title="Click to view all ref numbers"
         >
           {text}
