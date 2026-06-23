@@ -109,14 +109,7 @@ export function MessagesScreen() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild type="button" variant="default">
-            <Link href="/deals?page=1&limit=20">Deals</Link>
-          </Button>
-          <Button asChild type="button" variant="default">
-            <Link
-              href={`/messages/cleaned?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              View cleaned messages
-            </Link>
+            <Link href="/deals?page=1&limit=20">View deals</Link>
           </Button>
           <Button asChild type="button" variant="default">
             <Link
