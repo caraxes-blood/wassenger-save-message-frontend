@@ -6,13 +6,16 @@ export type SavedMessage = {
   sender: string;
   conversation_id: string;
   timestamp: string;
-  payload: unknown;
   created_at: string;
-  /** When omitted (older payloads), UI treats as unknown. */
-  is_relevant?: boolean;
-  skip_reason?: string | null;
-  sender_name?: string | null;
-  chat_name?: string | null;
+  is_relevant: boolean;
+  skip_reason: string | null;
+  processed_at: string;
+  type: string;
+  group_name: string | null;
+  message_body: string | null;
+  caption: string | null;
+  image_url: string | null;
+  ref_numbers: string[];
 };
 
 export type MessagesPage = {

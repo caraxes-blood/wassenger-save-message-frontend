@@ -77,7 +77,12 @@ export function GroupsScreen() {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ wid, active }: { wid: string; active: boolean }) => {
+      console.log("[groups] PATCH /groups — toggle active", { wid, active });
       const res = await api.patch<{ data: Group }>('/groups', { wid, active });
+      console.log("[groups] PATCH /groups — toggle active ok", {
+        wid,
+        active: res.data.data.active,
+      });
       return res.data.data;
     },
     onMutate: ({ wid, active }) => {
@@ -109,7 +114,12 @@ export function GroupsScreen() {
       void queryClient.invalidateQueries({ queryKey: ["groups"] });
       setToggleError(null);
     },
-    onError: (err, { wid }) => {
+    onError: (err, { wid, active }) => {
+      console.error("[groups] PATCH /groups — toggle active failed", {
+        wid,
+        active,
+        error: err instanceof Error ? err.message : String(err),
+      });
       setPendingWids((prev) => {
         const next = new Set(prev);
         next.delete(wid);

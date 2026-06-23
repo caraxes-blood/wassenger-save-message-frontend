@@ -37,6 +37,8 @@ const defaultColumnVisibility: VisibilityState = {
   id: false,
   message_id: false,
   conversation_id: false,
+  created_at: false,
+  image_url: false,
 };
 
 export function MessagesDataTable({ data }: MessagesDataTableProps) {

@@ -3,9 +3,8 @@
 import type { ColumnDef } from "@tanstack/react-table";
 
 import {
-  getMessageType,
-  getPreview,
   messageDateFmt,
+  resolveMessageImageUrl,
   truncateMessagePreview,
 } from "@/lib/message-display";
 import { typeBadgeClasses } from "@/lib/type-badge";
@@ -65,6 +64,37 @@ function TypePill({ type }: { type: string }) {
   );
 }
 
+function NullableText({
+  value,
+  maxWidthClass,
+}: {
+  value: string | null | undefined;
+  maxWidthClass?: string;
+}) {
+  const s = typeof value === "string" ? value.trim() : "";
+  if (!s) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+  return (
+    <span className={maxWidthClass} title={s}>
+      {s}
+    </span>
+  );
+}
+
+function TruncatedBody({ value }: { value: string | null | undefined }) {
+  const raw = typeof value === "string" ? value : "";
+  const text = truncateMessagePreview(raw, 120);
+  if (!text) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+  return (
+    <span className="text-muted-foreground line-clamp-3 max-w-md whitespace-pre-wrap wrap-break-word text-xs leading-relaxed">
+      {text}
+    </span>
+  );
+}
+
 export const messagesColumns: ColumnDef<SavedMessage>[] = [
   {
     accessorKey: "id",
@@ -95,31 +125,47 @@ export const messagesColumns: ColumnDef<SavedMessage>[] = [
     ),
   },
   {
-    accessorKey: "sender_name",
-    meta: { label: "Sender name" },
-    header: formatTableHeaderLabel("sender_name"),
-    cell: ({ row }) => {
-      const v = row.original.sender_name;
-      const s = typeof v === "string" ? v.trim() : "";
-      if (!s) return <span className="text-muted-foreground">—</span>;
-      return (
-        <span className="max-w-[200px] truncate" title={s}>
-          {s}
-        </span>
-      );
-    },
+    accessorKey: "group_name",
+    meta: { label: "Group name" },
+    header: formatTableHeaderLabel("group_name"),
+    cell: ({ row }) => (
+      <NullableText
+        value={row.original.group_name}
+        maxWidthClass="max-w-[220px] truncate"
+      />
+    ),
   },
   {
-    accessorKey: "chat_name",
-    meta: { label: "Chat name" },
-    header: formatTableHeaderLabel("chat_name"),
+    accessorKey: "type",
+    meta: { label: "Type" },
+    header: formatTableHeaderLabel("type"),
+    cell: ({ row }) => <TypePill type={row.original.type} />,
+  },
+  {
+    accessorKey: "message_body",
+    meta: { label: "Message body" },
+    header: formatTableHeaderLabel("message_body"),
+    cell: ({ row }) => <TruncatedBody value={row.original.message_body} />,
+  },
+  {
+    accessorKey: "caption",
+    meta: { label: "Caption" },
+    header: formatTableHeaderLabel("caption"),
+    cell: ({ row }) => <TruncatedBody value={row.original.caption} />,
+  },
+  {
+    accessorKey: "ref_numbers",
+    meta: { label: "Ref numbers" },
+    header: formatTableHeaderLabel("ref_numbers"),
     cell: ({ row }) => {
-      const v = row.original.chat_name;
-      const s = typeof v === "string" ? v.trim() : "";
-      if (!s) return <span className="text-muted-foreground">—</span>;
+      const refs = row.original.ref_numbers;
+      if (!refs?.length) {
+        return <span className="text-muted-foreground">—</span>;
+      }
+      const text = refs.join(", ");
       return (
-        <span className="max-w-[220px] truncate" title={s}>
-          {s}
+        <span className="max-w-[200px] truncate text-xs" title={text}>
+          {text}
         </span>
       );
     },
@@ -137,16 +183,6 @@ export const messagesColumns: ColumnDef<SavedMessage>[] = [
     cell: ({ row }) => <SkipReasonBadge reason={row.original.skip_reason} />,
   },
   {
-    accessorKey: "conversation_id",
-    meta: { label: "Conversation" },
-    header: formatTableHeaderLabel("conversation_id"),
-    cell: ({ row }) => (
-      <span className="messages-mono text-muted-foreground text-xs">
-        {row.getValue("conversation_id")}
-      </span>
-    ),
-  },
-  {
     accessorKey: "timestamp",
     meta: { label: "Timestamp" },
     header: formatTableHeaderLabel("timestamp"),
@@ -157,28 +193,54 @@ export const messagesColumns: ColumnDef<SavedMessage>[] = [
     ),
   },
   {
-    id: "type",
-    meta: { label: "Type" },
-    header: formatTableHeaderLabel("type"),
-    accessorFn: (row) => getMessageType(row.payload),
+    accessorKey: "processed_at",
+    meta: { label: "Processed at" },
+    header: formatTableHeaderLabel("processed_at"),
     cell: ({ row }) => (
-      <TypePill type={getMessageType(row.original.payload)} />
+      <span className="messages-mono text-muted-foreground whitespace-nowrap text-xs">
+        {messageDateFmt.format(new Date(row.getValue("processed_at")))}
+      </span>
     ),
   },
   {
-    id: "preview",
-    meta: { label: "Preview" },
-    header: formatTableHeaderLabel("preview"),
-    accessorFn: (row) => getPreview(row.payload),
+    accessorKey: "created_at",
+    meta: { label: "Created at" },
+    header: formatTableHeaderLabel("created_at"),
+    cell: ({ row }) => (
+      <span className="messages-mono text-muted-foreground whitespace-nowrap text-xs">
+        {messageDateFmt.format(new Date(row.getValue("created_at")))}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "conversation_id",
+    meta: { label: "Conversation" },
+    header: formatTableHeaderLabel("conversation_id"),
+    cell: ({ row }) => (
+      <span className="messages-mono text-muted-foreground text-xs">
+        {row.getValue("conversation_id")}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "image_url",
+    meta: { label: "Image URL" },
+    header: formatTableHeaderLabel("image_url"),
     cell: ({ row }) => {
-      const text = truncateMessagePreview(
-        getPreview(row.original.payload),
-        120,
-      );
+      const url = resolveMessageImageUrl(row.original.image_url);
+      if (!url) {
+        return <span className="text-muted-foreground">—</span>;
+      }
       return (
-        <span className="text-muted-foreground line-clamp-3 max-w-md whitespace-pre-wrap wrap-break-word text-xs leading-relaxed">
-          {text || "—"}
-        </span>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary max-w-[200px] truncate text-xs underline-offset-2 hover:underline"
+          title={url}
+        >
+          View
+        </a>
       );
     },
   },
