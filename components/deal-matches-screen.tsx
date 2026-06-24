@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { DealsDataTable } from "@/components/deals-data-table";
+import { DealMatchesDataTable } from "@/components/deal-matches-data-table";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,26 +17,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  DEAL_PAGE_SIZES,
-  parseDealPageLimit,
-} from "@/lib/deals-pagination";
-import {
-  buildDealsPath,
+  buildDealMatchesPath,
   parsePhoneFilterFromUrl,
-} from "@/lib/deals-filter-params";
+} from "@/lib/deal-matches-filter-params";
+import { DEAL_PAGE_SIZES, parseDealPageLimit } from "@/lib/deals-pagination";
 import { clampPage, getTotalPages } from "@/lib/messages-pagination";
 import { createWassengerClient } from "@/lib/wassenger-axios";
-import type { DealIntent, DealsPage } from "@/types/wassenger";
+import type { DealMatchesPage } from "@/types/wassenger";
 
-const DEAL_INTENTS = ["buy", "sell", "unknown"] as const;
-
-function parseIntentFromUrl(raw: string | null): string {
-  if (raw == null || raw === "") return "";
-  const t = raw.trim().toLowerCase();
-  return (DEAL_INTENTS as readonly string[]).includes(t) ? t : "";
-}
-
-export function DealsScreen() {
+export function DealMatchesScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const api = useMemo(() => createWassengerClient(), []);
@@ -50,7 +39,6 @@ export function DealsScreen() {
   const rawPhoneFromUrl = searchParams.get("phone") ?? "";
   const phoneFromUrl = parsePhoneFilterFromUrl(rawPhoneFromUrl);
   const refFromUrl = searchParams.get("ref") ?? "";
-  const intentFromUrl = parseIntentFromUrl(searchParams.get("intent"));
 
   const [phoneInput, setPhoneInput] = useState(phoneFromUrl);
   const [refInput, setRefInput] = useState(refFromUrl);
@@ -76,12 +64,11 @@ export function DealsScreen() {
     if (phoneDebounceRef.current) clearTimeout(phoneDebounceRef.current);
     phoneDebounceRef.current = setTimeout(() => {
       router.replace(
-        buildDealsPath({
+        buildDealMatchesPath({
           page: 1,
           limit: limitFromUrl,
           phone: value.trim(),
           ref: refFromUrl,
-          intent: intentFromUrl,
         }),
       );
     }, 350);
@@ -92,34 +79,25 @@ export function DealsScreen() {
     if (refDebounceRef.current) clearTimeout(refDebounceRef.current);
     refDebounceRef.current = setTimeout(() => {
       router.replace(
-        buildDealsPath({
+        buildDealMatchesPath({
           page: 1,
           limit: limitFromUrl,
           phone: phoneFromUrl,
           ref: value.trim(),
-          intent: intentFromUrl,
         }),
       );
     }, 350);
   }
 
   const query = useQuery({
-    queryKey: [
-      "deals",
-      pageFromUrl,
-      limitFromUrl,
-      phoneFromUrl,
-      refFromUrl,
-      intentFromUrl,
-    ],
+    queryKey: ["deal-matches", pageFromUrl, limitFromUrl, phoneFromUrl, refFromUrl],
     queryFn: async () => {
-      const res = await api.get<DealsPage>("/deals", {
+      const res = await api.get<DealMatchesPage>("/deal-matches", {
         params: {
           page: pageFromUrl,
           limit: limitFromUrl,
           ...(phoneFromUrl ? { phone: phoneFromUrl } : {}),
           ...(refFromUrl ? { ref: refFromUrl } : {}),
-          ...(intentFromUrl ? { intent: intentFromUrl } : {}),
         },
       });
       return res.data;
@@ -133,47 +111,28 @@ export function DealsScreen() {
   useEffect(() => {
     if (!rawPhoneFromUrl || rawPhoneFromUrl === phoneFromUrl) return;
     router.replace(
-      buildDealsPath({
+      buildDealMatchesPath({
         page: pageFromUrl,
         limit: limitFromUrl,
         phone: phoneFromUrl,
         ref: refFromUrl,
-        intent: intentFromUrl,
       }),
     );
-  }, [
-    intentFromUrl,
-    limitFromUrl,
-    pageFromUrl,
-    phoneFromUrl,
-    rawPhoneFromUrl,
-    refFromUrl,
-    router,
-  ]);
+  }, [limitFromUrl, pageFromUrl, phoneFromUrl, rawPhoneFromUrl, refFromUrl, router]);
 
   useEffect(() => {
     if (!data) return;
     if (safePage !== pageFromUrl) {
       router.replace(
-        buildDealsPath({
+        buildDealMatchesPath({
           page: safePage,
           limit: limitFromUrl,
           phone: phoneFromUrl,
           ref: refFromUrl,
-          intent: intentFromUrl,
         }),
       );
     }
-  }, [
-    data,
-    intentFromUrl,
-    limitFromUrl,
-    pageFromUrl,
-    phoneFromUrl,
-    refFromUrl,
-    router,
-    safePage,
-  ]);
+  }, [data, limitFromUrl, pageFromUrl, phoneFromUrl, refFromUrl, router, safePage]);
 
   async function onLogout() {
     setLogoutBusy(true);
@@ -192,49 +151,31 @@ export function DealsScreen() {
   }
 
   function buildHref(p: number) {
-    return buildDealsPath({
+    return buildDealMatchesPath({
       page: p,
       limit: limitFromUrl,
       phone: phoneFromUrl,
       ref: refFromUrl,
-      intent: intentFromUrl,
     });
   }
 
   function onLimitChange(next: string) {
     router.replace(
-      buildDealsPath({
+      buildDealMatchesPath({
         page: 1,
         limit: Number(next),
         phone: phoneFromUrl,
         ref: refFromUrl,
-        intent: intentFromUrl,
       }),
     );
   }
-
-  function onIntentChange(value: string) {
-    const nextIntent =
-      value === "__all__" ? "" : (value as DealIntent);
-    router.replace(
-      buildDealsPath({
-        page: 1,
-        limit: limitFromUrl,
-        phone: phoneFromUrl,
-        ref: refFromUrl,
-        intent: nextIntent,
-      }),
-    );
-  }
-
-  const intentSelectValue = intentFromUrl || "__all__";
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
       <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="messages-heading text-xl font-semibold tracking-tight">
-            Deals
+            Deal matches
           </h1>
           <p className="text-muted-foreground text-sm">
             {data
@@ -244,22 +185,13 @@ export function DealsScreen() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild type="button" variant="outline">
-            <Link
-              href={`/deal-matches?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              Deal matches
-            </Link>
-          </Button>
-          <Button asChild type="button" variant="default">
-            <Link href={`/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}>
-              Messages
+            <Link href={`/deals?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}>
+              Deals
             </Link>
           </Button>
           <Button asChild type="button" variant="outline">
-            <Link
-              href={`/messages/cleaned?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              Cleaned messages
+            <Link href={`/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}>
+              Messages
             </Link>
           </Button>
           <Button asChild type="button" variant="outline">
@@ -281,7 +213,7 @@ export function DealsScreen() {
 
       {query.isError ? (
         <div className="shrink-0 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
-          <p className="font-medium">Could not load deals</p>
+          <p className="font-medium">Could not load deal matches</p>
           <p className="text-muted-foreground mt-1">
             {query.error instanceof Error
               ? query.error.message
@@ -299,7 +231,7 @@ export function DealsScreen() {
       ) : null}
 
       {query.isLoading ? (
-        <p className="text-muted-foreground shrink-0 text-sm">Loading deals…</p>
+        <p className="text-muted-foreground shrink-0 text-sm">Loading deal matches…</p>
       ) : null}
 
       {data && !query.isLoading ? (
@@ -330,28 +262,9 @@ export function DealsScreen() {
                 onChange={(e) => onRefChange(e.target.value)}
               />
             </div>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Intent
-              </span>
-              <Select value={intentSelectValue} onValueChange={onIntentChange}>
-                <SelectTrigger size="sm" className="w-44">
-                  <SelectValue placeholder="All intents" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All intents</SelectItem>
-                  {DEAL_INTENTS.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
-          <DealsDataTable data={data.data} />
+          <DealMatchesDataTable data={data.data} />
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Rows per page</span>

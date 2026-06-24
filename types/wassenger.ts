@@ -142,3 +142,26 @@ export type DealsPage = {
   hasNext: boolean;
   hasPrev: boolean;
 };
+
+export type DealMatch = {
+  id: string;
+  ref_number: string;
+  buyer_deal_id: string;
+  seller_deal_id: string;
+  buyer_number: string;
+  seller_number: string;
+  buyer_price_amount: number | null;
+  buyer_price_currency: string | null;
+  seller_price_amount: number | null;
+  seller_price_currency: string | null;
+  created_at: string;
+};
+
+export type DealMatchesPage = {
+  data: DealMatch[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
