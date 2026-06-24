@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { CleanedMessagesDataTable } from "@/components/cleaned-messages-data-table";
+import { FiltersDropdown } from "@/components/filters-dropdown";
+import { LogoutLink, NavLinks } from "@/components/nav-links";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -187,12 +188,19 @@ export function CleanedMessagesScreen() {
   const intentSelectValue = intentFromUrl || "__all__";
   const isSystemSelectValue =
     isSystemFromUrl === "" ? "__all__" : isSystemFromUrl;
+  const activeFilterCount = [intentFromUrl, isSystemFromUrl].filter(Boolean).length;
+
+  function onClearFilters() {
+    router.replace(
+      buildCleanedMessagesPath({ page: 1, limit: limitFromUrl, intent: "", isSystem: "" }),
+    );
+  }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-3 overflow-hidden p-4 md:p-6">
+      <header className="flex shrink-0 flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="messages-heading text-xl font-semibold tracking-tight">
+          <h1 className="messages-heading text-2xl font-semibold tracking-tight">
             Cleaned messages
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -201,29 +209,14 @@ export function CleanedMessagesScreen() {
               : "Loading…"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="default">
-            <Link
-              href={`/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              Back to messages
-            </Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link
-              href={`/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              View failed messages
-            </Link>
-          </Button>
-          <Button
-            disabled={logoutBusy}
-            onClick={onLogout}
-            type="button"
-            variant="destructive"
-          >
-            {logoutBusy ? "Signing out…" : "Log out"}
-          </Button>
+        <div className="flex flex-col items-end gap-1.5">
+          <NavLinks
+            links={[
+              { href: `/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Messages" },
+              { href: `/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Failed messages" },
+            ]}
+          />
+          <LogoutLink busy={logoutBusy} onClick={onLogout} />
         </div>
       </header>
 
@@ -253,44 +246,47 @@ export function CleanedMessagesScreen() {
       ) : null}
 
       {data && !query.isLoading ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Intent
-              </span>
-              <Select value={intentSelectValue} onValueChange={onIntentChange}>
-                <SelectTrigger size="sm" className="w-44">
-                  <SelectValue placeholder="All intents" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All intents</SelectItem>
-                  {CLEANED_INTENTS.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                System messages
-              </span>
-              <Select value={isSystemSelectValue} onValueChange={onIsSystemChange}>
-                <SelectTrigger size="sm" className="w-44">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All</SelectItem>
-                  <SelectItem value="false">Human only</SelectItem>
-                  <SelectItem value="true">System only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <CleanedMessagesDataTable data={data.data} />
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+          <CleanedMessagesDataTable
+            data={data.data}
+            filters={
+              <FiltersDropdown activeCount={activeFilterCount} onClear={onClearFilters}>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    Intent
+                  </span>
+                  <Select value={intentSelectValue} onValueChange={onIntentChange}>
+                    <SelectTrigger size="sm" className="w-full">
+                      <SelectValue placeholder="All intents" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All intents</SelectItem>
+                      {CLEANED_INTENTS.map((i) => (
+                        <SelectItem key={i} value={i}>
+                          {i}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    System messages
+                  </span>
+                  <Select value={isSystemSelectValue} onValueChange={onIsSystemChange}>
+                    <SelectTrigger size="sm" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All</SelectItem>
+                      <SelectItem value="false">Human only</SelectItem>
+                      <SelectItem value="true">System only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FiltersDropdown>
+            }
+          />
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Rows per page</span>

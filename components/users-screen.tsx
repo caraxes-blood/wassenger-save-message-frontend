@@ -1,10 +1,11 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { FiltersDropdown } from "@/components/filters-dropdown";
+import { NavLinks } from "@/components/nav-links";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { UsersDataTable } from "@/components/users-data-table";
 import { Button } from "@/components/ui/button";
@@ -136,12 +137,18 @@ export function UsersScreen() {
   }
 
   const groupSelectValue = groupWidFromUrl || "__all__";
+  const activeFilterCount = [qFromUrl, groupWidFromUrl].filter(Boolean).length;
+
+  function onClearFilters() {
+    setSearchInput("");
+    router.replace(buildUsersPath({ page: 1, limit: limitFromUrl, q: "", groupWid: "" }));
+  }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-3 overflow-hidden p-4 md:p-6">
+      <header className="flex shrink-0 flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="messages-heading text-xl font-semibold tracking-tight">
+          <h1 className="messages-heading text-2xl font-semibold tracking-tight">
             Users
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -150,17 +157,13 @@ export function UsersScreen() {
               : "Loading…"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="default">
-            <Link href="/messages?page=1&limit=20">Messages</Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/messages/cleaned?page=1&limit=20">Cleaned messages</Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/groups?page=1&limit=20">Groups</Link>
-          </Button>
-        </div>
+        <NavLinks
+          links={[
+            { href: "/messages?page=1&limit=20", label: "Messages" },
+            { href: "/messages/cleaned?page=1&limit=20", label: "Cleaned messages" },
+            { href: "/groups?page=1&limit=20", label: "Groups" },
+          ]}
+        />
       </header>
 
       {usersQuery.isError ? (
@@ -187,42 +190,45 @@ export function UsersScreen() {
       ) : null}
 
       {data && !usersQuery.isLoading ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Search
-              </span>
-              <input
-                className="h-8 w-56 rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="Name or phone…"
-                type="search"
-                value={searchInput}
-                onChange={(e) => onSearchChange(e.target.value)}
-              />
-            </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+          <UsersDataTable
+            data={data.data}
+            filters={
+              <FiltersDropdown activeCount={activeFilterCount} onClear={onClearFilters}>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    Search
+                  </span>
+                  <input
+                    className="h-8 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="Name or phone…"
+                    type="search"
+                    value={searchInput}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                  />
+                </div>
 
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Group
-              </span>
-              <Select value={groupSelectValue} onValueChange={onGroupChange}>
-                <SelectTrigger size="sm" className="w-56">
-                  <SelectValue placeholder="All groups" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All groups</SelectItem>
-                  {(groupsQuery.data?.data ?? []).map((g) => (
-                    <SelectItem key={g.wid} value={g.wid}>
-                      {g.name ?? g.wid}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <UsersDataTable data={data.data} />
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    Group
+                  </span>
+                  <Select value={groupSelectValue} onValueChange={onGroupChange}>
+                    <SelectTrigger size="sm" className="w-full">
+                      <SelectValue placeholder="All groups" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">All groups</SelectItem>
+                      {(groupsQuery.data?.data ?? []).map((g) => (
+                        <SelectItem key={g.wid} value={g.wid}>
+                          {g.name ?? g.wid}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FiltersDropdown>
+            }
+          />
 
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

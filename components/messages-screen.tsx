@@ -2,11 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { MessagesDataTable } from "@/components/messages-data-table";
+import { LogoutLink, NavLinks } from "@/components/nav-links";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,10 +95,10 @@ export function MessagesScreen() {
   }
 
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-3 overflow-hidden p-4 md:p-6">
+      <header className="flex shrink-0 flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="messages-heading text-xl font-semibold tracking-tight">
+          <h1 className="messages-heading text-2xl font-semibold tracking-tight">
             Messages
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -107,31 +107,16 @@ export function MessagesScreen() {
               : "Loading…"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="default">
-            <Link href="/deals?page=1&limit=20">View deals</Link>
-          </Button>
-          <Button asChild type="button" variant="default">
-            <Link
-              href={`/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}
-            >
-              View failed messages
-            </Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/users?page=1&limit=20">View users</Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/groups?page=1&limit=20">Groups</Link>
-          </Button>
-          <Button
-            disabled={logoutBusy}
-            onClick={onLogout}
-            type="button"
-            variant="destructive"
-          >
-            {logoutBusy ? "Signing out…" : "Log out"}
-          </Button>
+        <div className="flex flex-col items-end gap-1.5">
+          <NavLinks
+            links={[
+              { href: "/deals?page=1&limit=20", label: "Deals" },
+              { href: `/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Failed messages" },
+              { href: "/users?page=1&limit=20", label: "Users" },
+              { href: "/groups?page=1&limit=20", label: "Groups" },
+            ]}
+          />
+          <LogoutLink busy={logoutBusy} onClick={onLogout} />
         </div>
       </header>
 
@@ -159,7 +144,7 @@ export function MessagesScreen() {
       ) : null}
 
       {data && !query.isLoading ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
           <MessagesDataTable data={data.data} />
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

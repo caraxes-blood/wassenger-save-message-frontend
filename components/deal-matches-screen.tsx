@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DealMatchesDataTable } from "@/components/deal-matches-data-table";
+import { FiltersDropdown } from "@/components/filters-dropdown";
+import { LogoutLink, NavLinks } from "@/components/nav-links";
 import { PageNumberPagination } from "@/components/page-number-pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -170,11 +171,19 @@ export function DealMatchesScreen() {
     );
   }
 
+  const activeFilterCount = [phoneFromUrl, refFromUrl].filter(Boolean).length;
+
+  function onClearFilters() {
+    setPhoneInput("");
+    setRefInput("");
+    router.replace(buildDealMatchesPath({ page: 1, limit: limitFromUrl, phone: "", ref: "" }));
+  }
+
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-4 overflow-hidden p-4 md:p-6">
-      <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mx-auto flex min-h-0 w-full max-w-[min(100%,2200px)] flex-1 flex-col gap-3 overflow-hidden p-4 md:p-6">
+      <header className="flex shrink-0 flex-col gap-2 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="messages-heading text-xl font-semibold tracking-tight">
+          <h1 className="messages-heading text-2xl font-semibold tracking-tight">
             Deal matches
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -183,31 +192,16 @@ export function DealMatchesScreen() {
               : "Loading…"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild type="button" variant="outline">
-            <Link href={`/deals?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}>
-              Deals
-            </Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href={`/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`}>
-              Messages
-            </Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/users?page=1&limit=20">Users</Link>
-          </Button>
-          <Button asChild type="button" variant="outline">
-            <Link href="/groups?page=1&limit=20">Groups</Link>
-          </Button>
-          <Button
-            disabled={logoutBusy}
-            onClick={onLogout}
-            type="button"
-            variant="destructive"
-          >
-            {logoutBusy ? "Signing out…" : "Log out"}
-          </Button>
+        <div className="flex flex-col items-end gap-1.5">
+          <NavLinks
+            links={[
+              { href: `/deals?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Deals" },
+              { href: `/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Messages" },
+              { href: "/users?page=1&limit=20", label: "Users" },
+              { href: "/groups?page=1&limit=20", label: "Groups" },
+            ]}
+          />
+          <LogoutLink busy={logoutBusy} onClick={onLogout} />
         </div>
       </header>
 
@@ -235,36 +229,39 @@ export function DealMatchesScreen() {
       ) : null}
 
       {data && !query.isLoading ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Phone
-              </span>
-              <input
-                className="h-8 w-56 rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="+923001234567"
-                type="search"
-                value={phoneInput}
-                onChange={(e) => onPhoneChange(e.target.value)}
-              />
-            </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+          <DealMatchesDataTable
+            data={data.data}
+            filters={
+              <FiltersDropdown activeCount={activeFilterCount} onClear={onClearFilters}>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    Phone
+                  </span>
+                  <input
+                    className="h-8 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="+923001234567"
+                    type="search"
+                    value={phoneInput}
+                    onChange={(e) => onPhoneChange(e.target.value)}
+                  />
+                </div>
 
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-                Ref
-              </span>
-              <input
-                className="h-8 w-56 rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                placeholder="126610LN"
-                type="search"
-                value={refInput}
-                onChange={(e) => onRefChange(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <DealMatchesDataTable data={data.data} />
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+                    Ref
+                  </span>
+                  <input
+                    className="h-8 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    placeholder="126610LN"
+                    type="search"
+                    value={refInput}
+                    onChange={(e) => onRefChange(e.target.value)}
+                  />
+                </div>
+              </FiltersDropdown>
+            }
+          />
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Rows per page</span>
