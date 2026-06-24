@@ -20,6 +20,10 @@ const defaultColumnVisibility: VisibilityState = {
   id: false,
   buyer_deal_id: false,
   seller_deal_id: false,
+  buyer_group_name: false,
+  buyer_message: false,
+  seller_group_name: false,
+  seller_message: false,
 };
 
 export function DealMatchesDataTable({ data, filters }: DealMatchesDataTableProps) {

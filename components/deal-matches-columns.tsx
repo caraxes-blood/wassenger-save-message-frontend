@@ -41,6 +41,15 @@ function PriceCell({
   );
 }
 
+function TextCell({ value }: { value: string | null }) {
+  if (!value) return <span className="text-muted-foreground">—</span>;
+  return (
+    <span className="block max-w-60 truncate text-xs" title={value}>
+      {value}
+    </span>
+  );
+}
+
 export const dealMatchesColumns: ColumnDef<DealMatch>[] = [
   {
     accessorKey: "id",
@@ -82,6 +91,22 @@ export const dealMatchesColumns: ColumnDef<DealMatch>[] = [
     ),
   },
   {
+    accessorKey: "buyer_group_name",
+    meta: { label: "Buyer group" },
+    header: formatTableHeaderLabel("buyer_group_name"),
+    cell: ({ row }) => <TextCell value={row.getValue("buyer_group_name")} />,
+  },
+  {
+    id: "buyer_message",
+    meta: { label: "Buyer message" },
+    header: formatTableHeaderLabel("buyer_message"),
+    cell: ({ row }) => (
+      <TextCell
+        value={row.original.buyer_message_body ?? row.original.buyer_caption}
+      />
+    ),
+  },
+  {
     accessorKey: "seller_number",
     meta: { label: "Seller #" },
     header: formatTableHeaderLabel("seller_number"),
@@ -99,6 +124,22 @@ export const dealMatchesColumns: ColumnDef<DealMatch>[] = [
       <PriceCell
         amount={row.original.seller_price_amount}
         currency={row.original.seller_price_currency}
+      />
+    ),
+  },
+  {
+    accessorKey: "seller_group_name",
+    meta: { label: "Seller group" },
+    header: formatTableHeaderLabel("seller_group_name"),
+    cell: ({ row }) => <TextCell value={row.getValue("seller_group_name")} />,
+  },
+  {
+    id: "seller_message",
+    meta: { label: "Seller message" },
+    header: formatTableHeaderLabel("seller_message"),
+    cell: ({ row }) => (
+      <TextCell
+        value={row.original.seller_message_body ?? row.original.seller_caption}
       />
     ),
   },

@@ -155,6 +155,12 @@ export type DealMatch = {
   seller_price_amount: number | null;
   seller_price_currency: string | null;
   created_at: string;
+  buyer_group_name: string | null;
+  buyer_message_body: string | null;
+  buyer_caption: string | null;
+  seller_group_name: string | null;
+  seller_message_body: string | null;
+  seller_caption: string | null;
 };
 
 export type DealMatchesPage = {
