@@ -27,6 +27,26 @@ export type MessagesPage = {
   hasPrev: boolean;
 };
 
+export type FailedMessage = {
+  jobId: string;
+  messageId: string;
+  from: string;
+  type: string;
+  body: string | null;
+  failedAt: string;
+  createdAt: string;
+  error: string | null;
+};
+
+export type FailedMessagesPage = {
+  data: FailedMessage[];
+  total: number;
+  page: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+};
+
 export type User = {
   phone: string;
   name: string | null;
