@@ -27,44 +27,6 @@ export type MessagesPage = {
   hasPrev: boolean;
 };
 
-export type FailedMessage = {
-  jobId: string;
-  messageId: string;
-  from: string;
-  body: string;
-  type: string;
-  failedAt: string;
-  createdAt: string;
-  error: string;
-};
-
-export type FailedMessagesPage = {
-  data: FailedMessage[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-};
-
-export type CleanedMessage = {
-  id: string;
-  message_id: string;
-  sender: string;
-  conversation_id: string;
-  timestamp: string;
-  clean_body: string;
-  intent: string;
-  confidence: number;
-  intent_signal: string;
-  price_usd: number | null;
-  watch_ref: string | null;
-  condition: string | null;
-  language: string;
-  is_system: boolean;
-  processed_at: string;
-};
-
 export type User = {
   phone: string;
   name: string | null;
@@ -100,15 +62,6 @@ export type GroupsResponse = {
 
 export type GroupsPage = {
   data: Group[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-};
-
-export type CleanedMessagesPage = {
-  data: CleanedMessage[];
   total: number;
   page: number;
   totalPages: number;

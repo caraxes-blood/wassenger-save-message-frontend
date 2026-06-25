@@ -255,7 +255,7 @@ export function DealsScreen() {
             links={[
               { href: `/deal-matches?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Deal matches" },
               { href: `/messages?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Messages" },
-              { href: `/messages/cleaned?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Cleaned messages" },
+              { href: `/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Failed messages" },
               { href: "/users?page=1&limit=20", label: "Users" },
               { href: "/groups?page=1&limit=20", label: "Groups" },
             ]}

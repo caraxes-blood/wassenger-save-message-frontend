@@ -111,6 +111,7 @@ export function MessagesScreen() {
           <NavLinks
             links={[
               { href: "/deals?page=1&limit=20", label: "Deals" },
+              { href: "/deal-matches?page=1&limit=20", label: "Deal matches" },
               { href: `/messages/failed?page=1&limit=${encodeURIComponent(String(limitFromUrl))}`, label: "Failed messages" },
               { href: "/users?page=1&limit=20", label: "Users" },
               { href: "/groups?page=1&limit=20", label: "Groups" },
@@ -150,7 +151,7 @@ export function MessagesScreen() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="whitespace-nowrap">Rows per page</span>
               <Select value={String(limitFromUrl)} onValueChange={onLimitChange}>
-                <SelectTrigger size="sm" className="w-[4.5rem]">
+                <SelectTrigger size="sm" className="w-18">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

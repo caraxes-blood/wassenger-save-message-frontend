@@ -160,7 +160,7 @@ export function UsersScreen() {
         <NavLinks
           links={[
             { href: "/messages?page=1&limit=20", label: "Messages" },
-            { href: "/messages/cleaned?page=1&limit=20", label: "Cleaned messages" },
+            { href: "/messages/failed?page=1&limit=20", label: "Failed messages" },
             { href: "/groups?page=1&limit=20", label: "Groups" },
           ]}
         />
