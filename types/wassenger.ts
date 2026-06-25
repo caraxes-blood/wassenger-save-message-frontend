@@ -158,9 +158,11 @@ export type DealMatch = {
   buyer_group_name: string | null;
   buyer_message_body: string | null;
   buyer_caption: string | null;
+  buyer_message_timestamp: string;
   seller_group_name: string | null;
   seller_message_body: string | null;
   seller_caption: string | null;
+  seller_message_timestamp: string;
 };
 
 export type DealMatchesPage = {

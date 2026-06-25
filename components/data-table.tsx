@@ -27,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { messageDateFmt } from "@/lib/message-display";
 import { formatTableHeaderLabel } from "@/lib/utils";
 
 function isInteractiveTarget(target: EventTarget | null): boolean {
@@ -34,8 +35,21 @@ function isInteractiveTarget(target: EventTarget | null): boolean {
   return !!target.closest("button, a, input, [role='switch']");
 }
 
-function formatDetailValue(value: unknown): string {
+function isLikelyDateField(key: string): boolean {
+  return /(?:^|_)(?:timestamp|date|at)$/i.test(key);
+}
+
+function toReadableDate(value: string): string | null {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return messageDateFmt.format(parsed);
+}
+
+function formatDetailValue(key: string, value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
+  if (typeof value === "string" && isLikelyDateField(key)) {
+    return toReadableDate(value) ?? value;
+  }
   if (typeof value === "object") return JSON.stringify(value, null, 2);
   return String(value);
 }
@@ -167,7 +181,7 @@ export function DataTable<TData>({
                       {formatTableHeaderLabel(key)}
                     </dt>
                     <dd className="select-text whitespace-pre-wrap wrap-break-word">
-                      {formatDetailValue(value)}
+                      {formatDetailValue(key, value)}
                     </dd>
                   </div>
                 ),
