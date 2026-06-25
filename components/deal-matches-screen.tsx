@@ -36,7 +36,7 @@ export function DealMatchesScreen() {
     Number.isFinite(rawPage) ? Math.floor(rawPage) : 1,
     Number.MAX_SAFE_INTEGER,
   );
-  const limitFromUrl = parseDealPageLimit(searchParams.get("limit"));
+  const limitFromUrl = parseDealPageLimit(searchParams.get("limit") ?? "100");
   const rawPhoneFromUrl = searchParams.get("phone") ?? "";
   const phoneFromUrl = parsePhoneFilterFromUrl(rawPhoneFromUrl);
   const refFromUrl = searchParams.get("ref") ?? "";
