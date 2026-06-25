@@ -1,6 +1,6 @@
 /** Public API origin (same as `.env.example`). Used only when env is unset in development. */
 const DEFAULT_WASSENGER_API_BASE_URL =
-  "http://localhost:5173";
+  "https://bw-wassenger-2ddabe9ab8d7.herokuapp.com";
 
 export function getWassengerBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_WASSENGER_API_BASE_URL?.trim();

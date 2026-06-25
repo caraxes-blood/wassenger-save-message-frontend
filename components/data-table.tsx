@@ -58,6 +58,7 @@ type DataTableProps<TData> = {
   emptyMessage?: string;
   minWidthClassName?: string;
   filters?: ReactNode;
+  renderDetails?: (row: TData) => ReactNode;
 };
 
 /** Shared compact table shell: filters + column visibility dropdown + row-click details modal. */
@@ -67,6 +68,7 @@ export function DataTable<TData>({
   emptyMessage = "No results.",
   minWidthClassName = "min-w-480",
   filters,
+  renderDetails,
 }: DataTableProps<TData>) {
   const [detailsRow, setDetailsRow] = useState<TData | null>(null);
   const visibleCount = table.getVisibleLeafColumns().length;
@@ -170,21 +172,25 @@ export function DataTable<TData>({
               Full record details
             </DialogDescription>
           </DialogHeader>
-          <dl className="grid max-h-[60vh] grid-cols-[minmax(0,140px)_1fr] gap-x-3 gap-y-2 overflow-y-auto text-sm">
-            {detailsRow &&
-              Object.entries(detailsRow as Record<string, unknown>).map(
-                ([key, value]) => (
-                  <div className="contents" key={key}>
-                    <dt className="text-muted-foreground pt-0.5 text-xs font-medium uppercase tracking-wide">
-                      {formatTableHeaderLabel(key)}
-                    </dt>
-                    <dd className="select-text whitespace-pre-wrap wrap-break-word">
-                      {formatDetailValue(key, value)}
-                    </dd>
-                  </div>
-                ),
-              )}
-          </dl>
+          {detailsRow && renderDetails ? (
+            <div className="max-h-[60vh] overflow-y-auto">{renderDetails(detailsRow)}</div>
+          ) : (
+            <dl className="grid max-h-[60vh] grid-cols-[minmax(0,140px)_1fr] gap-x-3 gap-y-2 overflow-y-auto text-sm">
+              {detailsRow &&
+                Object.entries(detailsRow as Record<string, unknown>).map(
+                  ([key, value]) => (
+                    <div className="contents" key={key}>
+                      <dt className="text-muted-foreground pt-0.5 text-xs font-medium uppercase tracking-wide">
+                        {formatTableHeaderLabel(key)}
+                      </dt>
+                      <dd className="select-text whitespace-pre-wrap wrap-break-word">
+                        {formatDetailValue(key, value)}
+                      </dd>
+                    </div>
+                  ),
+                )}
+            </dl>
+          )}
         </DialogContent>
       </Dialog>
     </div>
