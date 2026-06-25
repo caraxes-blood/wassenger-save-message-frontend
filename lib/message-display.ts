@@ -1,9 +1,16 @@
 import { getWassengerBaseUrl } from "./wassenger-env";
+import { format, parseISO } from "date-fns";
 
 export const messageDateFmt = new Intl.DateTimeFormat(undefined, {
   dateStyle: "short",
   timeStyle: "short",
 });
+
+export function formatReadableMessageDate(value: string | Date): string | null {
+  const parsed = value instanceof Date ? value : parseISO(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return format(parsed, "d MMMM yyyy 'at' h:mm aaa");
+}
 
 export function resolveMessageImageUrl(
   path: string | null | undefined,

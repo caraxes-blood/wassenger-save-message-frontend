@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { messageDateFmt } from "@/lib/message-display";
+import { formatReadableMessageDate } from "@/lib/message-display";
 import { formatTableHeaderLabel } from "@/lib/utils";
 
 function isInteractiveTarget(target: EventTarget | null): boolean {
@@ -40,9 +40,7 @@ function isLikelyDateField(key: string): boolean {
 }
 
 function toReadableDate(value: string): string | null {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return null;
-  return messageDateFmt.format(parsed);
+  return formatReadableMessageDate(value);
 }
 
 function formatDetailValue(key: string, value: unknown): string {
