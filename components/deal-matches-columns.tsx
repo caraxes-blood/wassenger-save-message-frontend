@@ -1,10 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { messageDateFmt } from "@/lib/message-display";
 import { formatTableHeaderLabel } from "@/lib/utils";
-import type { DealMatch } from "@/types/wassenger";
+import type { DealMatch, MatchedProduct } from "@/types/wassenger";
 
 function formatDealPrice(
   amount: number | null,
@@ -47,6 +55,161 @@ function TextCell({ value }: { value: string | null }) {
     <span className="block max-w-60 truncate text-xs" title={value}>
       {value}
     </span>
+  );
+}
+
+function fmt(amount: number | null, currency = "USD"): string {
+  if (amount === null || !Number.isFinite(amount)) return "—";
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${amount.toLocaleString()} ${currency}`;
+  }
+}
+
+function StatusBadge({ status }: { status: string | null }) {
+  if (!status) return null;
+  const isPurchased = /purchased|instock/i.test(status);
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide ${
+        isPurchased
+          ? "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400"
+          : "border-border bg-muted text-muted-foreground"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function ProductCard({ product }: { product: MatchedProduct }) {
+  const discount =
+    product.retail_online && product.retail_online_discount
+      ? Math.round(
+          ((product.retail_online - product.retail_online_discount) /
+            product.retail_online) *
+            100,
+        )
+      : null;
+
+  const imgSrc = product.cover_photo
+    ? `https://brickellwatches-resized.s3-us-west-2.amazonaws.com/${product.cover_photo}`
+    : null;
+
+  return (
+    <div className="rounded-lg border border-border bg-muted/40 p-4">
+      <div className="mb-3 flex items-start gap-3">
+        {imgSrc && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imgSrc}
+            alt={product.name}
+            className="h-16 w-16 shrink-0 rounded-md border border-border object-cover"
+          />
+        )}
+        <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{product.name}</p>
+            <p className="messages-mono mt-0.5 text-xs text-muted-foreground">{product.ref}</p>
+          </div>
+          <StatusBadge status={product.status} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <PriceRow label="Retail" value={fmt(product.retail_online)} dimmed />
+        <PriceRow label="Discounted" value={fmt(product.retail_online_discount)} highlight={discount !== null ? `-${discount}%` : undefined} />
+        <PriceRow label="Sell price" value={fmt(product.sell_price)} />
+        <PriceRow label="Sale price" value={fmt(product.new_sale_price)} accent />
+      </div>
+    </div>
+  );
+}
+
+function PriceRow({
+  label,
+  value,
+  dimmed,
+  accent,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  dimmed?: boolean;
+  accent?: boolean;
+  highlight?: string;
+}) {
+  return (
+    <div className="rounded-md border border-border bg-background px-2.5 py-2">
+      <p className="mb-0.5 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <div className="flex items-baseline gap-1.5">
+        <span
+          className={`messages-mono text-sm font-semibold ${
+            dimmed
+              ? "text-muted-foreground line-through"
+              : accent
+                ? "text-primary"
+                : "text-foreground"
+          }`}
+        >
+          {value}
+        </span>
+        {highlight && (
+          <span className="rounded border border-green-200 bg-green-50 px-1 py-px text-[9px] font-bold text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-400">
+            {highlight}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProductsCell({ products }: { products: MatchedProduct[] | null }) {
+  const [open, setOpen] = useState(false);
+  const count = products?.length ?? 0;
+
+  if (count === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>;
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+      >
+        <span>{count}</span>
+        <span className="text-muted-foreground">{count === 1 ? "match" : "matches"}</span>
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg" onClick={(e) => e.stopPropagation()}>
+          <DialogHeader>
+            <DialogTitle>Matched Products</DialogTitle>
+            <DialogDescription>
+              {count} product{count !== 1 ? "s" : ""} matched for this deal
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
+            {products!.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -141,6 +304,14 @@ export const dealMatchesColumns: ColumnDef<DealMatch>[] = [
       <TextCell
         value={row.original.seller_message_body ?? row.original.seller_caption}
       />
+    ),
+  },
+  {
+    id: "matched_products",
+    meta: { label: "Products" },
+    header: formatTableHeaderLabel("matched_products"),
+    cell: ({ row }) => (
+      <ProductsCell products={row.original.matched_products} />
     ),
   },
   {

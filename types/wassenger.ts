@@ -116,6 +116,18 @@ export type DealsPage = {
   hasPrev: boolean;
 };
 
+export type MatchedProduct = {
+  id: number;
+  name: string;
+  ref: string;
+  retail_online: number | null;
+  retail_online_discount: number | null;
+  sell_price: number | null;
+  new_sale_price: number | null;
+  status: string | null;
+  cover_photo: string | null;
+};
+
 export type DealMatch = {
   id: string;
   ref_number: string;
@@ -136,6 +148,7 @@ export type DealMatch = {
   seller_message_body: string | null;
   seller_caption: string | null;
   seller_message_timestamp: string;
+  matched_products: MatchedProduct[] | null;
 };
 
 export type DealMatchesPage = {
